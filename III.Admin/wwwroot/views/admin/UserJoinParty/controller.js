@@ -10,6 +10,8 @@ app.factory('dataserviceJoinParty', function ($http) {
         "Content-Type": "application/json;odata=verbose",
         "Accept": "application/json;odata=verbose",
     }
+
+    
     var submitFormUpload = function (url, data, callback) {
         var req = {
             method: 'POST',
@@ -32,6 +34,9 @@ app.factory('dataserviceJoinParty', function ($http) {
         $http(req).then(callback);
     };
     return {
+        UpdateOrCreateJson:function (data,callback) {
+            $http.post('/admin/UserJoinParty/UpdateOrCreateJson?ResumeNumber='+data.ResumeNumber,data.json).then(callback);
+        },
         //địa chỉ 
         getProvince: function (callback) {
             $http.get('/UserProfile/GetProvince').then(callback);
@@ -238,7 +243,20 @@ app.factory('dataserviceJoinParty', function ($http) {
         },
     }
 });
+app.controller("ConvertJson", function ($scope, $rootScope, dataserviceJoinParty) {
+    $scope.listNote=[]
+    $scope.model = {
+        comment: '',
+        id:''
+    }
+    //Hàm lấy file json gán vào listNote (nếu có)
 
+    //Hàm submit gọi api
+    $scope.submit = function () { 
+        
+        
+    }
+});
 
 app.controller('Ctrl_USER_JOIN_PARTY', function ($scope, $rootScope, $compile, $uibModal, DTOptionsBuilder, DTColumnBuilder, dataserviceJoinParty, $cookies, $translate) {
     $rootScope.go = function (path) {
@@ -368,6 +386,9 @@ app.config(function ($routeProvider, $validatorProvider, $translateProvider) {
     });
 });
 app.controller('index', function ($scope, $rootScope, $compile, $uibModal, DTOptionsBuilder, DTColumnBuilder, DTInstances, dataserviceJoinParty, $location, $translate) {
+
+    
+
     var vm = $scope;
     $scope.tabnav = 'Section3'; // Initialize tabnav variable
 
@@ -934,7 +955,127 @@ app.controller('file-version', function ($scope, $rootScope, $compile, $uibModal
     };
 });
 
-app.controller('edit-user-join-party', function ($scope, $rootScope, $compile, $routeParams, dataserviceJoinParty, $filter,$http) { 
+app.controller('edit-user-join-party', function ($scope, $rootScope, $compile, $routeParams, dataserviceJoinParty, $filter, $http) { 
+
+     $scope.popoverLabels = [
+        {
+            "id": "HovaTen",
+            "labelText": "Họ và tên",
+        },
+        {
+            "id": "NgaySinh",
+            "labelText": "Ngày sinh",
+        },
+        {
+            "id": "GioiTinh",
+            "labelText": "Giới tính",
+        },
+        {
+            "id": "SDT",
+            "labelText": "Số điện thoại",
+        },
+        {
+            "id": "NoiSinh",
+            "labelText": "Nơi sinh",
+        },
+       {
+            "id": "QueQuan",
+            "labelText": "Quê quán",
+        },
+        {
+            "id": "ThuongTru",
+            "labelText": "Thường trú",
+        },
+        {
+            "id": "TamTru",
+            "labelText": "Tam trú",
+        },
+        {
+            "id": "CVHT",
+            "labelText": "Công việc hiện tại",
+        },
+        {
+            "id": "DanToc",
+            "labelText": "Dân tộc",
+        },
+        {
+            "id": "TonGiao",
+            "labelText": "Tôn giáo",
+        },
+        {
+            "id": "HovaTenKS",
+            "labelText": "Họ và tên khai sinh",
+        },
+        {
+            "id": "GDPT",
+            "labelText": "Giáo dục phổ thông",
+        },
+        {
+            "id": "GDDH",
+            "labelText": "Giáo dục đại học",
+        },
+        {
+            "id": "HocHam",
+            "labelText": "Học hàm",
+        },
+        {
+            "id": "GDNN",
+            "labelText": "Giáo dục nghề nghiệp",
+        },
+        {
+            "id": "NgoaiNgu",
+            "labelText": "Ngoại ngữ",
+        },
+        {
+            "id": "TDTTS",
+            "labelText": "Tiếng dân tộc thiểu số",
+        },
+        {
+            "id": "LLCT",
+            "labelText": "Lý luận chính trị",
+        },
+        {
+            "id": "TinHoc",
+            "labelText": "Tin học",
+        },
+        {
+            "id": "NoiTao",
+            "labelText": "Nơi tạo",
+        },
+        {
+            "id": "TuNhanXet",
+            "labelText": "Tự nhận xét",
+        },
+    ];
+
+    $scope.popoverLabel = '';
+    $scope.popoverid = '';
+    $scope.commentTextarea = '';
+    var matchedLabel = [];
+    $scope.openPopover = function (popoverId) {
+        matchedLabel = $scope.popoverLabels.find(function (item) {
+            return item.id === popoverId;
+        });
+        $scope.pp.id = matchedLabel.id;
+        $scope.popoverid = matchedLabel.id;
+        if (matchedLabel) {
+            $scope.popoverLabel = matchedLabel.labelText;
+            $scope.commentTextarea = matchedLabel.comment;
+        }
+    };
+    
+    $scope.submit = function () {
+        if ($scope.pp.id !== '' && $scope.pp.comment !== '') {
+            $scope.addJson();
+        }
+    };
+
+    $scope.closePopover = function () {
+        if ($scope.popoverid === matchedLabel.id) {
+            delete $scope.popoverLabels;
+        }
+    };
+
     $scope.ImportFile = function (data) {
         $scope.Json={
             Profile:data,
@@ -1055,6 +1196,57 @@ app.controller('edit-user-join-party', function ($scope, $rootScope, $compile, $
             }
         });
     }
+
+    $scope.userGroup = [];
+    $scope.fetchUserGroup = function () {
+        dataserviceJoinParty.GetGroupUser(function (rs) {
+            console.log(rs);
+            $scope.userGroup = rs.data;
+        });
+
+        var currentUrl = window.location.href;
+
+        function getFileNameFromUrl(url) {
+            var parts = url.split('/');
+            return parts[parts.length - 1];
+        }
+
+        var fileName = getFileNameFromUrl(currentUrl);
+
+        // Tạo đường dẫn đến tệp JSON
+        var jsonUrl = `/uploads/json/reviewprofile_${fileName}.json`;
+
+        $http.get(jsonUrl).then(function (response) {
+            $scope.jsonGuide = response.data;
+            console.log($scope.jsonGuide);
+        }).catch(function (error) {
+            console.error('Lỗi khi tải dữ liệu JSON:', error);
+        });
+    };
+
+    $scope.selectItem = function (item) {
+        $scope.selectedGroupUser = item.Code;
+    };
+
+    $scope.fetchUserGroup();
+
+    $('.icon-clickable').click(function () {
+        var id = $(this).attr('id');
+        $scope.handleUserClick(id);
+        $scope.$apply();
+    });
+
+    $scope.handleUserClick = function (id) {
+        if (!Array.isArray($scope.jsonGuide)) {
+            $scope.jsonGuide = [];
+            console.warn('$scope.jsonGuide không phải là một mảng. Đã gán thành một mảng trống.');
+        }
+
+        $scope.matchedItemss= $scope.jsonGuide.filter(function (item) {
+            return item.id === id;
+        });
+    };
+
     $scope.downloadFile = function (file) {
         // Tạo một phần tử a để tạo ra một liên kết tới tệp Word
         var link = document.createElement("a");
@@ -1205,21 +1397,70 @@ app.controller('edit-user-join-party', function ($scope, $rootScope, $compile, $
             })
 
     }
+
+    $scope.pp = {
+        id: '',
+        comment: ''
+    }
+    
+    $scope.addJson = function () {
+        console.log($scope.pp);
+        if ($scope.pp.id != null && $scope.pp.id != ''&&
+            $scope.pp.comment != null && $scope.pp.comment != ''
+        ) {
+            var data = {
+                ResumeNumber:$scope.infUser.ResumeNumber,
+                json: $scope.pp
+            }
+            dataserviceJoinParty.UpdateOrCreateJson(data, function (rs) {
+                rs = rs.data;
+                if (rs.Error) {
+                    App.toastrError(rs.Title);
+                }
+                else {
+                    App.toastrSuccess(rs.Title);
+                }
+            })
+        }
+    }
     $scope.initData();
 
     $scope.GroupUsers = [];
-    $scope.getGrupUsers = function () {
+    
+    $scope.getGroupUsers = function () {
         dataserviceJoinParty.GetGroupUser(function (rs) {
             console.log(rs)
             $scope.GroupUsers = rs.data;
         })
+        $http.get('../views/front-end/user/Guide.json').then(function (response) {
+                $scope.jsonParse = response.data;
+                console.log($scope.jsonParse);
+        }).catch(function (error) {
+                console.error('Lỗi khi tải dữ liệu JSON:', error);
+        });
+        
     }
     $scope.onItemSelect = function (item) {
         $scope.GroupUser = item.Code;
     }
-    $scope.getGrupUsers();
+    $scope.getGroupUsers();
 
-    
+    $('.fa-info-circle').click(function () {
+        var id = $(this).attr('id');
+        $scope.handleClick(id);
+        $scope.$apply();
+    });
+    $scope.handleClick = function (id) {
+        if (!Array.isArray($scope.jsonParse)) {
+            $scope.jsonParse = [];
+            console.warn('$scope.jsonParse không phải là một mảng. Đã gán thành một mảng trống.');
+        }
+
+        // Tiếp tục xử lý như bình thường
+        $scope.matchedItems= $scope.jsonParse.filter(function (item) {
+            return item.id === id;
+        });
+    };
 
     $scope.createWfInstance = function () {
         $scope.modelWfInst = {

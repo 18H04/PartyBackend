@@ -407,7 +407,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group row">
                                         <div class="col-md-4 pr-0" style="white-space:nowrap">
-                                            <i class="fa fa-user"></i>
+                                            <i class="fa fa-user icon-clickable"></i>
                                             <label class="control-label require custom-title-code-bold displayInfo">
                                                 Họ
                                                 và
@@ -418,8 +418,8 @@
                                             <div class="br24 form-control custom-title-code-bold" style="white-space:nowrap">
                                                 <i class="fa fa-info-circle" id="currentName" title="Popover Header"
                                                    popover-placement="bottom-left"
-                                                   uib-popover="Họ và tên của bạn là: {{infUser.LastName}}. {{matchedItems[0].guide}}">
-                                                </i>
+                                                   uib-popover="Họ tên của bạn là: {{infUser.LastName}}. {{matchedItems[0].guide}}."> </i>
+
                                                 <input class="displayInfo speechInput" name="CusCode"
                                                        ng-model="infUser.LastName" type="text" placeholder="Họ và tên"
                                                        ng-required="true">
@@ -977,7 +977,7 @@
                                             <div class="br24 form-control custom-title-code-bold" style="display:flex">
                                                 <i class="fa fa-info-circle" data-bs-toggle="popover"
                                                    title="Popover Header" data-bs-placement="bottom"
-                                                   data-bs-content="Ví dụ: 'Hà Nội'"
+                                                   data-bs-content="Ví dụ: 'Nhóm 1'"
                                                    style="vertical-align: 7px; display: flex; align-items: center;"></i>
                                                 <ui-select ng-model="GroupUser" theme="bootstrap" class="displayInfo"
                                                            ng-change="onItemSelect($select.selected)"

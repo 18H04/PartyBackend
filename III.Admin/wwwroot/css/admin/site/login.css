@@ -464,14 +464,6 @@ body {
     .mtd1 {
         margin-top: 40px !important;
     }
-
-    .check-icon {
-        right: 60px;
-        top: 0;
-        position: absolute;
-        line-height: 65px !important;
-        font-size: 40px !important;
-    }
 }
 
 @media (min-width: 565px) and (max-width: 768px) {
@@ -1111,4 +1103,6 @@ a:not([href]):not([tabindex]) {
     right: 60px;
     top: 0;
     position: absolute;
+    line-height: 35px !important;
 }
+@media screen and max

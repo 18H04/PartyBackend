@@ -40,6 +40,8 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Hosting;
 using Amazon.SimpleNotificationService.Util;
 using static III.Admin.Controllers.UserProfileController;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace III.Admin.Controllers
 {
@@ -84,7 +86,74 @@ namespace III.Admin.Controllers
             public WorkingTracking[] WorkingTracking { get; set; }
         }
         [HttpPost]
+<<<<<<< Updated upstream
         public JMessage UpdateOrCreateUserfileJson([FromBody] converJsonPartyAdmission jsonData)
+=======
+        public JMessage UpdateOrCreateJson([FromBody]ItemNoteJson jsonData, string ResumeNumber)
+        {
+            var rs = new JMessage { Error = false, };
+            try
+            {
+                // Đường dẫn tới file JSON
+                string filePath = _hostingEnvironment.WebRootPath + "/uploads/json/reviewprofile_" + ResumeNumber + ".json";
+                //lấy json
+                if (System.IO.File.Exists(filePath))
+                {
+                    // Đọc dữ liệu từ file JSON
+                    string existingData = System.IO.File.ReadAllText(filePath);
+
+                    // Chuyển đổi dữ liệu JSON từ file thành đối tượng C#
+                    List<ItemNoteJson> existingObject = JsonConvert.DeserializeObject<List<ItemNoteJson>>(existingData);
+
+                    var Object = existingObject.FirstOrDefault(x => x.id == jsonData.id);
+                    if (Object == null)
+                    {
+                        existingObject.Add(jsonData);
+                    }
+                    else
+                    {
+                        existingObject.ForEach(x =>
+                        {
+                            if(x.id == jsonData.id)
+                            {
+                                x.comment = jsonData.comment;
+                            }
+                        });
+                        Object = jsonData;
+                    }
+
+                    // Chuyển đối tượng đã cập nhật thành JSON
+                    string updatedJsonData = JsonConvert.SerializeObject(existingObject);
+
+                    // Ghi lại vào file JSON
+                    System.IO.File.WriteAllText(filePath, updatedJsonData);
+
+                    rs.Title = "Cập nhật thành công";
+                    return rs;
+                }
+                else
+                {
+                    List<ItemNoteJson> existingObject = new List<ItemNoteJson> { };
+                    existingObject.Add(jsonData);
+                    string updatedJsonData = JsonConvert.SerializeObject(existingObject);
+                    // Tạo mới file JSON nếu không tồn tại
+                    System.IO.File.WriteAllText(filePath, updatedJsonData);
+
+                    rs.Title = "Thêm file thành công";
+                    return rs;
+                }
+            }
+            catch (Exception ex)
+            {
+                rs.Error = true;
+                rs.Title = "Không thể tạo file";
+            }
+            return rs;
+        }
+
+        [HttpPost]
+        public JMessage UpdateOrCreateUserfileJson([FromBody] ModelViewPAMP jsonData)
+>>>>>>> Stashed changes
         {
             var rs = new JMessage { Error = false, };
             try
@@ -588,6 +657,12 @@ namespace III.Admin.Controllers
        
 
         #endregion
+    }
+
+    public class ItemNoteJson
+    {
+        public string id { get; set; }
+        public string comment { get; set; }
     }
 
     public class ModelUserJoinPartyTable
