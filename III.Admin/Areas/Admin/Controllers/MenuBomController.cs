@@ -2,7 +2,8 @@
 
 namespace III.Admin.Areas.Admin.Controllers
 {
-    public class MenuBomController : Controller
+    [Area("Admin")]
+    public class MenuBOMController : Controller
     {
         public IActionResult Index()
         {
