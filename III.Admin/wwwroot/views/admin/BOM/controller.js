@@ -84,6 +84,9 @@ app.config(function ($routeProvider, $validatorProvider, $translateProvider, $ht
         .when('/', {
             templateUrl: ctxfolderBOM + '/index.html',
             controller: 'index'
+        }).when('/input', {
+            templateUrl: ctxfolderBOM + '/input.html',
+            controller: 'input'
         })
 
     $validatorProvider.setDefaults({
@@ -158,4 +161,39 @@ app.controller('index', function ($scope, $rootScope, $cookies, $filter, $transl
         Name:'tùy chọn 3',
         Code: "3",
     }]
+})
+
+app.controller('input', function ($scope, $rootScope, $cookies, $filter, $translate,dataservice){
+    $scope.isEditWorkflow=false;
+    function formatActIns(objIns) {
+        dataservice.GetActInstArranged(objIns,function(rs){
+            console.log(rs.data)
+            if(rs.data.ActArranged==[]){
+                $scope.isEditWorkflow = false
+                fixContent()
+                return
+            }
+            $scope.listActs=rs.data.ActArranged;
+            $scope.isEditWorkflow = true
+            fixContent()
+        })
+    }
+
+    $scope.editWorkflow=function(){
+        $scope.isEditWorkflow=false
+        fixContent()
+    }
+    $scope.editWorkflow2=function(insCode){
+        formatActIns(insCode)
+        fixContent()
+    }
+    function fixContent(){
+        if ($scope.isEditWorkflow == true) {
+            $('#tblData_wrapper').css('width', '60%');
+            
+        }else{
+            $('#tblData_wrapper').css('width', '');
+            return
+        }
+    }
 })
